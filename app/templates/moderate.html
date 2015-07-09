@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}Flask1 - Comment Moderation {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Comment Moderation</h1>
+</div>
+{% set moderate = True %}  <!-- before handing control to _comments template, sets moderate variable to True, which is
+used in _comments to determine whether moderation features need to be rendered -->
+{% include '_comments.html' %}
+{% if pagination %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, 'moderate') }}
+</div>
+{% endif %}
+{% endblock %}

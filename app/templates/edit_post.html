@@ -1,0 +1,20 @@
+<!-- allows user to edit posts in standalone page. At top will be old post. Followed by Markdown editor
+with source Markdown for easy modification. Based on PageDown, so a preview can
+be shown at bottom of page.-->
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Flask1 - Edit Post{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Edit Post</h1>
+</div>
+<div>
+    {{ wtf.quick_form(form) }}
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+{% endblock %}
