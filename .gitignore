@@ -1,4 +1,6 @@
 __pycache__/
-flask1venv/
+venv/
 tmp/
+.idea/
 teststuff.txt
+heroku_info.txt

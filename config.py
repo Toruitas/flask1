@@ -20,6 +20,7 @@ class Config:
     FLASKY_FOLLOWERS_PER_PAGE = 50
     SQlALCHEMY_RECORD_QUERIES = True  # enable recording of q stats
     FLASKY_SLOW_DB_QUERY_TIME= 0.5  # timeout of half sec
+    SSL_DISABLE = True
 
     @staticmethod
     def init_app(app):
@@ -53,6 +54,7 @@ class ProductionConfig(Config):
     Good for factory methods, like this.
     https://julien.danjou.info/blog/2013/guide-python-static-class-abstract-methods
     """
+    import psycopg2
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir,'data.sqlite')
 
@@ -79,9 +81,37 @@ class ProductionConfig(Config):
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)
 
+class HerokuConfig(ProductionConfig):
+    SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
+
+    @classmethod
+    def init_app(cls, app):
+        ProductionConfig.init_app(app)  # first this so we get the email logging
+
+        # handle proxy server headers
+        # Heroku passes everything internally with HTTP, so if a request started with HTTPS and then got changed to
+        # HTTP inside, browser would give warning.
+        # All components of a page must have matching security.
+        # Werk has a middleware that checks custom headers ad updates the request obj accordingly, so that
+        # request.is_secure for example reflects security of the req the client sent to reverse proxy server of Heroku
+        # and not that the proxy server sent to app. Pg225
+        # WSGI middlewares such as ProxyFix are added by wrapping the WSGI app.
+        # When reqcomes, middlewares get chance to inspect the environ and make changes before req is processed.
+        # Necessary for any reverse proxy server deployment.
+        from werkzeug.contrib.fixers import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app)
+
+        # log to stderr
+        import logging
+        from logging import StreamHandler
+        file_handler = StreamHandler()
+        file_handler.setLevel(logging.WARNING)
+        app.logger.addHandler(file_handler)
+
 config = {
     'development' : DevelopmentConfig,
     'testing' : TestingConfig,
     'production' : ProductionConfig,
+    'heroku': HerokuConfig,
     'default': DevelopmentConfig,
 }
