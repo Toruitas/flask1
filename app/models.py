@@ -153,7 +153,7 @@ class Role(db.Model):
         roles = {'User': (Permission.FOLLOW | Permission.COMMENT | Permission.WRITE_ARTICLES, True),
                  'Moderator': (Permission.FOLLOW | Permission.COMMENT |
                                Permission.WRITE_ARTICLES | Permission.MODERATE_COMMENTS, False),
-                 'Administrator': ('0xff', False)}  # can change these and run it later to change permissions
+                 'Administrator': (0xff, False)}  # can change these and run it later to change permissions
         for r in roles:
             role = Role.query.filter_by(name=r).first()
             if role is None:
