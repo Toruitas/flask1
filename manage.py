@@ -12,6 +12,13 @@ if os.environ.get('FLASK_COVERAGE'):
     COV = coverage.coverage(branch=True, include='app/*')
     COV.start()
 
+if os.path.exists('.env'):
+    print('Importing environment from .env...')
+    for line in open('.env'):
+        var = line.strip().split('=')
+        if len(var) == 2:
+            os.environ[var[0]] = var[1]
+
 from app import create_app, db
 from app.models import User, Role, Post, Follow, Permission, Comment
 from flask.ext.script import Manager,Shell
@@ -22,7 +29,7 @@ manager = Manager(app)
 migrate = Migrate(app,db)
 
 def make_shell_context():
-    return dict(app=app,db=db, User=User, Role=Role, Post=Post)
+    return dict(app=app,db=db, User=User, Role=Role, Post=Post, Follow=Follow, Permission=Permission, Comment=Comment)
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 

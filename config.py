@@ -19,7 +19,7 @@ class Config:
     FLASKY_COMMENTS_PER_PAGE = 30
     FLASKY_FOLLOWERS_PER_PAGE = 50
     SQlALCHEMY_RECORD_QUERIES = True  # enable recording of q stats
-    FLASKY_SLOW_DB_QUERY_TIME= 0.5  # timeout of half sec
+    FLASKY_SLOW_DB_QUERY_TIME = 0.5  # timeout of half sec
     SSL_DISABLE = True
 
     @staticmethod
@@ -108,10 +108,24 @@ class HerokuConfig(ProductionConfig):
         file_handler.setLevel(logging.WARNING)
         app.logger.addHandler(file_handler)
 
+class UnixConfig(ProductionConfig):
+    @classmethod
+    def init_app(cls, app):
+        ProductionConfig.init_app(app)
+
+        # log to syslog
+        import logging
+        from logging.handlers import SysLogHandler
+        syslog_handler = SysLogHandler()
+        syslog_handler.setLevel(logging.WARNING)
+        app.logger.addHandler(syslog_handler)
+
 config = {
     'development' : DevelopmentConfig,
     'testing' : TestingConfig,
     'production' : ProductionConfig,
     'heroku': HerokuConfig,
+    'unix': UnixConfig,
+
     'default': DevelopmentConfig,
 }
